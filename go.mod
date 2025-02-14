@@ -3,7 +3,6 @@ module github.com/nathanjms/go-google-sheets
 go 1.23.4
 
 require (
-	github.com/go-chi/chi v1.5.5
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/lmittmann/tint v1.0.7

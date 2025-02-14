@@ -6,7 +6,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/nathanjms/go-google-sheets/internal/application"
-	"github.com/nathanjms/go-google-sheets/internal/cache"
 	"github.com/nathanjms/go-google-sheets/internal/sheets"
 )
 
@@ -18,10 +17,10 @@ func RefreshHandler(app *application.Application) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to refresh cache: "+err.Error())
 		}
 
-		cache.Spreadsheet.Data = data
-		cache.Spreadsheet.Timestamp = time.Now().UnixNano() / int64(time.Millisecond)
+		app.Cache.Data.Spreadsheet.Data = data
+		app.Cache.Data.Spreadsheet.Timestamp = time.Now().UnixNano() / int64(time.Millisecond)
 
-		return c.JSON(http.StatusOK, map[string]interface{}{"message": "Cache updated", "data": cache.Spreadsheet.Data})
+		return c.JSON(http.StatusOK, map[string]interface{}{"message": "Cache updated", "data": app.Cache.Data.Spreadsheet.Data})
 
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/lmittmann/tint"
@@ -41,17 +42,18 @@ func run(logger *slog.Logger) error {
 		log.Fatalf("Error loading .env file, proceeding with system environment variables")
 	}
 
-	var cfg application.Config
-
-	cfg.BaseURL = env.GetString("BASE_URL", "http://localhost")
-	cfg.HTTPPort = env.GetInt("PORT", 3000)
-
 	fmt.Printf("version: %s\n", version.Get())
 
 	// --- APP ---
 	app := &application.Application{
-		Config: cfg,
+		Config: application.Config{
+			BaseURL:  env.GetString("BASE_URL", "http://localhost"),
+			HTTPPort: env.GetInt("PORT", 3000),
+		},
 		Logger: logger,
+		Cache: application.Cache{ // Initialize the cache here
+			CacheTTL: 60 * 60 * time.Second,
+		},
 	}
 
 	return serveHttp(app)

@@ -22,6 +22,7 @@ func InitRoutes(e *echo.Echo, app *application.Application) {
 		})
 	})
 
+	// Spreadsheet endpoints
 	e.GET("data", SpreadsheetHandler.GetDataHandler(app))
 	e.POST("reload", SpreadsheetHandler.RefreshHandler(app))
 }

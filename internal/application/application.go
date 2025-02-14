@@ -2,6 +2,7 @@ package application
 
 import (
 	"log/slog"
+	"time"
 )
 
 type Config struct {
@@ -14,13 +15,28 @@ type SpreadsheetRow struct {
 }
 
 type Cache struct {
-	Spreadsheet struct {
-		Data      []SpreadsheetRow `json:"data"`
-		Timestamp int64            `json:"timestamp"`
-	} `json:"spreadsheet"`
+	Data struct {
+		Spreadsheet struct {
+			Data      []SpreadsheetRow `json:"data"`
+			Timestamp int64            `json:"timestamp"`
+		} `json:"spreadsheet"`
+	}
+	CacheTTL time.Duration
 }
 
 type Application struct {
 	Config Config
 	Logger *slog.Logger
+	Cache  Cache // Add the Cache field
+}
+
+// NewApplication is a constructor for the application.
+func NewApplication(cfg Config, logger *slog.Logger) *Application {
+	return &Application{
+		Config: cfg,
+		Logger: logger,
+		Cache: Cache{ // Initialize the cache here
+			CacheTTL: 60 * 60 * time.Second,
+		},
+	}
 }
