@@ -10,15 +10,18 @@ type Config struct {
 	HTTPPort int
 }
 
-type SpreadsheetRow struct {
-	Name string `json:"name"`
+type SpreadsheetRow []interface{}
+
+type SpreadsheetData struct {
+	Headers []string         `json:"headers"`
+	Data    []SpreadsheetRow `json:"data"`
 }
 
 type Cache struct {
 	Data struct {
 		Spreadsheet struct {
-			Data      []SpreadsheetRow `json:"data"`
-			Timestamp int64            `json:"timestamp"`
+			Data      SpreadsheetData `json:"data"`
+			Timestamp int64           `json:"timestamp"`
 		} `json:"spreadsheet"`
 	}
 	CacheTTL time.Duration
