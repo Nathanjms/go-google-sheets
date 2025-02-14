@@ -20,7 +20,11 @@ func RefreshHandler(app *application.Application) echo.HandlerFunc {
 		app.Cache.Data.Spreadsheet.Data = data
 		app.Cache.Data.Spreadsheet.Timestamp = time.Now().UnixNano() / int64(time.Millisecond)
 
-		return c.JSON(http.StatusOK, map[string]interface{}{"message": "Cache updated", "data": app.Cache.Data.Spreadsheet.Data})
+		return c.JSON(http.StatusOK, application.Response{
+			Success: true,
+			Message: "Cache updated",
+			Data:    application.ResponseData{"data": app.Cache.Data.Spreadsheet.Data},
+		})
 
 	}
 }

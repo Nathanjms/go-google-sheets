@@ -23,6 +23,12 @@ func GetDataHandler(app *application.Application) echo.HandlerFunc {
 			app.Cache.Data.Spreadsheet.Timestamp = now
 		}
 
-		return c.JSON(http.StatusOK, app.Cache.Data.Spreadsheet.Data)
+		return c.JSON(http.StatusOK, application.Response{
+			Success: true,
+			Message: "Data Retrieved",
+			Data: application.ResponseData{
+				"data": app.Cache.Data.Spreadsheet.Data,
+			},
+		})
 	}
 }
