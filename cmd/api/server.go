@@ -11,7 +11,7 @@ import (
 func serveHttp(app *application.Application) error {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000", "https://*.nathanjms.co.uk"},
+		AllowOrigins:     []string{"http://localhost:3001", "https://*.nathanjms.co.uk"},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderContentEncoding},
 		AllowCredentials: true,
 	}))

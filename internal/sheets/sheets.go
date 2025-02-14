@@ -60,5 +60,5 @@ func FetchSheetData(cfg application.Config, logger *slog.Logger) (application.Sp
 		}
 	}
 
-	return application.SpreadsheetData{Headers: headers, Data: sheetData}, nil
+	return application.SpreadsheetData{Headers: headers, Contents: sheetData}, nil
 }

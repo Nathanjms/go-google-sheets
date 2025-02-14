@@ -13,8 +13,8 @@ type Config struct {
 type SpreadsheetRow []interface{}
 
 type SpreadsheetData struct {
-	Headers []string         `json:"headers"`
-	Data    []SpreadsheetRow `json:"data"`
+	Headers  []string         `json:"headers"`
+	Contents []SpreadsheetRow `json:"contents"`
 }
 
 type Cache struct {
