@@ -37,7 +37,7 @@ func FetchSheetData(cfg application.Config, logger *slog.Logger) (application.Sp
 		return application.SpreadsheetData{}, fmt.Errorf("could not create sheets service: %w", err)
 	}
 
-	readRange := "Sheet1!A1:H100" // Loads (up to) 100, so it's the cols that are important
+	readRange := "Sheet1!A1:I100" // Loads (up to) 100, so it's the cols that are important
 	resp, err := srv.Spreadsheets.Values.Get(sheetID, readRange).Do()
 	if err != nil {
 		return application.SpreadsheetData{}, fmt.Errorf("unable to retrieve data from sheet: %w", err)
