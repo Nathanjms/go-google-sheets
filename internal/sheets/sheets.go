@@ -50,7 +50,6 @@ func FetchSheetData(cfg application.Config, logger *slog.Logger) (application.Sp
 	sheetData := []application.SpreadsheetRow{}
 	headers := []string{}
 	for i, row := range resp.Values {
-		fmt.Println(row)
 		if i == 0 {
 			for _, col := range row {
 				headers = append(headers, col.(string))
