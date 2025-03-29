@@ -6,8 +6,10 @@ import (
 )
 
 type Config struct {
-	BaseURL  string
-	HTTPPort int
+	BaseURL              string
+	HTTPPort             int
+	SpreadsheetId        string
+	GoogleServiceAccount string
 }
 
 type SpreadsheetRow []interface{}
@@ -17,13 +19,17 @@ type SpreadsheetData struct {
 	Contents []SpreadsheetRow `json:"contents"`
 }
 
+type SpreadsheetCache struct {
+	Data      SpreadsheetData `json:"data"`
+	Timestamp int64           `json:"timestamp"`
+}
+
+type Spreadsheets map[string]map[string]SpreadsheetCache
+
 type Cache struct {
 	Data struct {
-		Spreadsheet struct {
-			Data      SpreadsheetData `json:"data"`
-			Timestamp int64           `json:"timestamp"`
-		} `json:"spreadsheet"`
-	}
+		Spreadsheets Spreadsheets `json:"spreadsheets"`
+	} `json:"data"`
 	CacheTTL time.Duration
 }
 
@@ -39,6 +45,9 @@ func NewApplication(cfg Config, logger *slog.Logger) *Application {
 		Config: cfg,
 		Logger: logger,
 		Cache: Cache{ // Initialize the cache here
+			Data: struct {
+				Spreadsheets Spreadsheets `json:"spreadsheets"`
+			}{Spreadsheets: make(Spreadsheets)},
 			CacheTTL: 60 * 60 * time.Second,
 		},
 	}

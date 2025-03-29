@@ -13,5 +13,5 @@ This server allows for reading of a Google Sheet.
 
 - Copy `.env.example` to `.env` and fill in the details.
 - To Run;
-  - If using `air`, can run `air ./api/cmd` for hot reloading
-  - Else can use `go run ./api/cmd` and then rerun every time a change occurs
+  - If using `air`, can run `air` for hot reloading
+  - Else can use `go run ./cmd/api` and then rerun every time a change occurs

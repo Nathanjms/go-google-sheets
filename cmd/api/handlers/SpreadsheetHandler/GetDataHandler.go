@@ -11,23 +11,31 @@ import (
 
 func GetDataHandler(app *application.Application) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		now := time.Now().UnixNano() / int64(time.Millisecond)
+		sheetName := c.QueryParam("sheetName")
 
-		if len(app.Cache.Data.Spreadsheet.Data.Contents) == 0 || now-app.Cache.Data.Spreadsheet.Timestamp > int64(app.Cache.CacheTTL/time.Millisecond) {
+		if sheetName == "" {
+			sheetName = "Sheet1"
+		}
+
+		// Log the name:
+		app.Logger.Info("Getting data for sheet sheetName")
+
+		if len(app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId][sheetName].Data.Contents) == 0 ||
+			time.Now().UnixNano()/int64(time.Millisecond)-app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId][sheetName].Timestamp > int64(app.Cache.CacheTTL/time.Millisecond) {
 			app.Logger.Info("Cache expired. Fetching new data...")
-			data, err := sheets.FetchSheetData(app.Config, app.Logger) // Use sheets package
+			data, err := sheets.FetchSheetData(app.Config, sheetName, app.Logger) // Use sheets package
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch data: "+err.Error())
 			}
-			app.Cache.Data.Spreadsheet.Data = data
-			app.Cache.Data.Spreadsheet.Timestamp = now
+
+			sheets.StoreInCache(app, sheetName, data)
 		}
 
 		return c.JSON(http.StatusOK, application.Response{
 			Success: true,
 			Message: "Data Retrieved",
 			Data: application.ResponseData{
-				"data": app.Cache.Data.Spreadsheet.Data,
+				"data": app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId][sheetName].Data,
 			},
 		})
 	}
