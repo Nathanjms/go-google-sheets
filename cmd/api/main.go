@@ -47,8 +47,10 @@ func run(logger *slog.Logger) error {
 	// --- APP ---
 	app := &application.Application{
 		Config: application.Config{
-			BaseURL:  env.GetString("BASE_URL", "http://localhost"),
-			HTTPPort: env.GetInt("PORT", 3000),
+			BaseURL:              env.GetString("BASE_URL", "http://localhost"),
+			HTTPPort:             env.GetInt("PORT", 3000),
+			SpreadsheetId:        env.GetString("GOOGLE_SHEET_ID", ""),
+			GoogleServiceAccount: env.GetString("GOOGLE_SERVICE_ACCOUNT", ""),
 		},
 		Logger: logger,
 		Cache: application.Cache{ // Initialize the cache here

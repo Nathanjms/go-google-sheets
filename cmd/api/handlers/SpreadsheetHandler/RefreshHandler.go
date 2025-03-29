@@ -2,7 +2,6 @@ package SpreadsheetHandler
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/nathanjms/go-google-sheets/internal/application"
@@ -11,19 +10,23 @@ import (
 
 func RefreshHandler(app *application.Application) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		data, err := sheets.FetchSheetData(app.Config, app.Logger) // Use sheets package
+		sheetName := c.QueryParam("sheetName")
+
+		if sheetName == "" {
+			sheetName = "Sheet1"
+		}
+		data, err := sheets.FetchSheetData(app.Config, sheetName, app.Logger) // Use sheets package
 		if err != nil {
 			app.Logger.Error("Failed to refresh cache", "error", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to refresh cache: "+err.Error())
 		}
 
-		app.Cache.Data.Spreadsheet.Data = data
-		app.Cache.Data.Spreadsheet.Timestamp = time.Now().UnixNano() / int64(time.Millisecond)
+		sheets.StoreInCache(app, sheetName, data)
 
 		return c.JSON(http.StatusOK, application.Response{
 			Success: true,
 			Message: "Cache updated",
-			Data:    application.ResponseData{"data": app.Cache.Data.Spreadsheet.Data},
+			Data:    application.ResponseData{"data": app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId][sheetName].Data},
 		})
 
 	}

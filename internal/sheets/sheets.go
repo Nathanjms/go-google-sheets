@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/nathanjms/go-google-sheets/internal/application"
@@ -14,20 +14,16 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-func FetchSheetData(cfg application.Config, logger *slog.Logger) (application.SpreadsheetData, error) {
+func FetchSheetData(cfg application.Config, sheetName string, logger *slog.Logger) (application.SpreadsheetData, error) {
 
 	// Load .env file
 	err := godotenv.Load() // Loads .env from the current directory
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err) // Handle error appropriately
 	}
-	// Load environment variables
-	credentialsJSON := os.Getenv("GOOGLE_SERVICE_ACCOUNT")
-	sheetID := os.Getenv("GOOGLE_SHEET_ID")
-
 	ctx := context.Background()
 
-	conf, err := google.CredentialsFromJSON(ctx, []byte(credentialsJSON), sheets.SpreadsheetsReadonlyScope)
+	conf, err := google.CredentialsFromJSON(ctx, []byte(cfg.GoogleServiceAccount), sheets.SpreadsheetsReadonlyScope)
 	if err != nil {
 		return application.SpreadsheetData{}, fmt.Errorf("could not parse service account credentials: %w", err)
 	}
@@ -37,8 +33,8 @@ func FetchSheetData(cfg application.Config, logger *slog.Logger) (application.Sp
 		return application.SpreadsheetData{}, fmt.Errorf("could not create sheets service: %w", err)
 	}
 
-	readRange := "Sheet1!A1:I100" // Loads (up to) 100, so it's the cols that are important
-	resp, err := srv.Spreadsheets.Values.Get(sheetID, readRange).Do()
+	readRange := sheetName + "!A1:I100" // Loads (up to) 100, so it's the cols that are important
+	resp, err := srv.Spreadsheets.Values.Get(cfg.SpreadsheetId, readRange).Do()
 	if err != nil {
 		return application.SpreadsheetData{}, fmt.Errorf("unable to retrieve data from sheet: %w", err)
 	}
@@ -60,4 +56,21 @@ func FetchSheetData(cfg application.Config, logger *slog.Logger) (application.Sp
 	}
 
 	return application.SpreadsheetData{Headers: headers, Contents: sheetData}, nil
+}
+
+func StoreInCache(app *application.Application, sheetName string, data application.SpreadsheetData) {
+	// Ensure the main map is initialized
+	if app.Cache.Data.Spreadsheets == nil {
+		app.Cache.Data.Spreadsheets = make(application.Spreadsheets)
+	}
+
+	// Ensure the nested map is initialized
+	if _, ok := app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId]; !ok {
+		app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId] = make(map[string]application.SpreadsheetCache)
+	}
+
+	sheetCache := app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId][sheetName]
+	sheetCache.Data = data
+	sheetCache.Timestamp = time.Now().UnixNano() / int64(time.Millisecond)
+	app.Cache.Data.Spreadsheets[app.Config.SpreadsheetId][sheetName] = sheetCache
 }
