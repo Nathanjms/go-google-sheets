@@ -38,9 +38,9 @@ func main() {
 }
 
 func run(logger *slog.Logger) error {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loading .env file, proceeding with system environment variables")
-	}
+	if _, err := os.Stat(".env"); err == nil {
+        godotenv.Load(".env")
+    }
 
 	fmt.Printf("version: %s\n", version.Get())
 
