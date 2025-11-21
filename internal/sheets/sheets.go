@@ -2,12 +2,11 @@ package sheets
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
-	"log"
 	"log/slog"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/nathanjms/go-google-sheets/internal/application"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -15,15 +14,15 @@ import (
 )
 
 func FetchSheetData(cfg application.Config, sheetName string, logger *slog.Logger) (application.SpreadsheetData, error) {
-
-	// Load .env file
-	err := godotenv.Load() // Loads .env from the current directory
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err) // Handle error appropriately
-	}
 	ctx := context.Background()
 
-	conf, err := google.CredentialsFromJSON(ctx, []byte(cfg.GoogleServiceAccount), sheets.SpreadsheetsReadonlyScope)
+	// Base64 decode the service account credentials
+	decodedServiceAccount, err := base64.StdEncoding.DecodeString(cfg.GoogleServiceAccount)
+	if err != nil {
+		return application.SpreadsheetData{}, fmt.Errorf("could not decode service account credentials: %w", err)
+	}
+
+	conf, err := google.CredentialsFromJSON(ctx, decodedServiceAccount, sheets.SpreadsheetsReadonlyScope)
 	if err != nil {
 		return application.SpreadsheetData{}, fmt.Errorf("could not parse service account credentials: %w", err)
 	}
